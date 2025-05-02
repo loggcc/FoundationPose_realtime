@@ -42,11 +42,11 @@ This method leverages a modular engineering approach for 6D pose estimation and 
 
 ## Realtime Manipulation application
 
-![Realtime Demo](../assets/realtime_tracking.gif)
+![Realtime Demo](assets/realtime_tracking.gif)
 
 ## offline demo for book
 
-![offline Demo](../assets/book.gif)
+![offline Demo](assets/book.gif)
 
 
 
