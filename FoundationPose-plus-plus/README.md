@@ -88,9 +88,9 @@ $PROJECT_ROOT/test_realtime/$TESTCASE
 
 Test data (both online and offline) for book and test_tube, along with the trained YOLOv8 model, is available here:https://drive.google.com/drive/folders/1d5r2kKmLp0LrwcIyJ-ldvjb4zBZkXhIE?usp=drive_link
 
-![Realtime Demo](../assets/stacked.gif)
+![Realtime Demo](../assets/realtime_tracking.gif)
 
-![offline Demo](../assets/book.mp4)
+![offline Demo](../assets/book.gif)
 
 ###  offline demo:
 ```
