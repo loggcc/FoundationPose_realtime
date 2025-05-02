@@ -1,4 +1,4 @@
-# Realtime FoundationPose++: Realtime FoundationPose++: Real-Time 6D Object Tracking with YOLOv8 and RealSense
+# Realtime FoundationPose++: Real-Time 6D Object Tracking with YOLOv8 and RealSense
 
 This project extends FoundationPose++ by enabling real-time 6D pose tracking using a YOLOv8 segmentation model and Intel RealSense RGB-D camera. It eliminates the need for pre-recorded mask inputs by performing online object segmentation based on class name, using only the object’s mesh model as prior.
 
@@ -88,7 +88,9 @@ $PROJECT_ROOT/test_realtime/$TESTCASE
 
 Test data (both online and offline) for book and test_tube, along with the trained YOLOv8 model, is available here:https://drive.google.com/drive/folders/1d5r2kKmLp0LrwcIyJ-ldvjb4zBZkXhIE?usp=drive_link
 
+![Realtime Demo](../assets/stacked.gif)
 
+![offline Demo](../assets/book.mp4)
 
 ###  offline demo:
 ```
@@ -114,9 +116,11 @@ python src/obj_pose_track.py \
 
 ```
 <br>
-### online demo
+
+### realtime demo
 
 ```
+
 
 cd $PROJECT_ROOT
 export TESTCASE="testtube_realtime"
