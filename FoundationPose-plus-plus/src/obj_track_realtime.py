@@ -8,7 +8,7 @@ import sys
 import numpy as np
 import multiprocessing as mp
 from typing import List
-import imageio.v2 as imageio  # type: ignore # Suppress DeprecationWarning
+import imageio.v2 as imageio  
 import trimesh
 from scipy.spatial.transform import Rotation
 from VOT import Cutie, Tracker_2D  
@@ -170,17 +170,17 @@ def project_3d_to_2d(point_3d_homogeneous, K, ob_in_cam):
 
 
 def get_mat_from_6d_pose_arr(pose_arr):
-    # 提取位移 (xyz)
+    # get (xyz) translation
     xyz = pose_arr[:3]
     
-    # 提取欧拉角
+    # get euler angles
     euler_angles = pose_arr[3:]
     
-    # 从欧拉角生成旋转矩阵
+    # generate rotation matirx
     rotation = Rotation.from_euler('xyz', euler_angles, degrees=False)
     rotation_matrix = rotation.as_matrix()
     
-    # 创建 4x4 变换矩阵
+    # generate 4*4 tansformation matrix
     transformation_matrix = np.eye(4)
     transformation_matrix[:3, :3] = rotation_matrix
     transformation_matrix[:3, 3] = xyz
@@ -320,7 +320,7 @@ def pose_track(
             # Apply mask detection
             mask_full = get_object_mask_from_frame(
                 frame=frame,
-                target_class_name="blue_tube",  
+                target_class_name= class_name,  
                 yolo_model=yolo_model,
                 confidence_threshold=0.9,
                 visualize=True 
@@ -400,7 +400,7 @@ def pose_track(
                     kf_mean, kf_covariance = kf.initiate(get_6d_pose_arr_from_mat(pose))
 
                 
-                # pose 为4*4的矩阵
+            
                 mask_visualization_color_filename = None
                 bbox_visualization_color_filename = None
                 
@@ -539,7 +539,8 @@ if __name__ == "__main__":
     parser.add_argument("--apply_color", type=json.loads, default="[0, 159, 237]", help="RGB color to apply, in format 'r,g,b'. Only effective if force_apply_color")
     args = parser.parse_args()
     yolo_model_path = '/workspace/foundationpose/FoundationPose-plus-plus/best.pt'
-    yolo_model = YOLO(yolo_model_path)  # Make sure task='segment'
+    yolo_model = YOLO(yolo_model_path)  
+    class_name = "blue_tube"
 
     pose_track(args.mesh_path,
         np.array(args.cam_K),
