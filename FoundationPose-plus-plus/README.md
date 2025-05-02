@@ -82,15 +82,25 @@ $PROJECT_ROOT/test_realtime/$TESTCASE
 
 <br>
 
+## Demos
+
+### Realtime Manipulation application
+
+![Realtime Demo](../assets/realtime_tracking.gif)
+
+### offline demo for book
+
+![offline Demo](../assets/book.gif)
+
+
 ## Try Demo
+
+
 
 - Download Demo data and YOLOv8 model:
 
 Test data (both online and offline) for book and test_tube, along with the trained YOLOv8 model, is available here:https://drive.google.com/drive/folders/1d5r2kKmLp0LrwcIyJ-ldvjb4zBZkXhIE?usp=drive_link
 
-![Realtime Demo](../assets/realtime_tracking.gif)
-
-![offline Demo](../assets/book.gif)
 
 ###  offline demo:
 ```
