@@ -38,13 +38,13 @@ This method leverages a modular engineering approach for 6D pose estimation and 
 <br>
 
 
-# Demos
+## Demos
 
-## Realtime Manipulation application
+### Realtime Manipulation application
 
 ![Realtime Demo](assets/realtime_tracking.gif)
 
-## offline demo for book
+### offline demo for book
 
 ![offline Demo](assets/book.gif)
 
@@ -57,7 +57,7 @@ Check [install.md](./Install.md) to install all the dependencies.
 
 <br>
 
-# Data prepare
+## Data prepare
 
 
 1) [Download demo data](https://drive.google.com/drive/folders/1d5r2kKmLp0LrwcIyJ-ldvjb4zBZkXhIE?usp=drive_link) and extract them under the folder `test_data/` and `test_realtime/`
@@ -111,9 +111,9 @@ $PROJECT_ROOT/test_realtime/$TESTCASE
 
 
 
-# Run demo
+## Run demo
 
-##  Run offline demo:
+###  Run offline demo:
 ```
 
 export TESTCASE="book"
