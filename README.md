@@ -137,7 +137,7 @@ python src/obj_pose_track.py \
 ```
 <br>
 
-### Run realtime demo
+### Run online demo
 
 ```
 export TESTCASE="testtube_realtime"
