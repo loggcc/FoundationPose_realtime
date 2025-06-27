@@ -140,7 +140,7 @@ python src/obj_pose_track.py \
 ### Run online demo
 
 ```
-export TESTCASE="testtube_realtime"
+export TESTCASE="blue_tube"
 python src/obj_track_realtime.py \
 --mesh_path /workspace/foundationpose/test_realtime/$TESTCASE/mesh/$TESTCASE.stl \
 --pose_output_path /workspace/foundationpose/test_realtime/$TESTCASE/pose.npy \
@@ -153,6 +153,9 @@ python src/obj_track_realtime.py \
 --force_apply_color \
 --apply_color "[0, 159, 237]" \
 --est_refine_iter 10 \
+--class_name $TESTCASE
+--yolo_model_path '/workspace/foundationpose/best.pt'
+
 
 ```
 <br>
