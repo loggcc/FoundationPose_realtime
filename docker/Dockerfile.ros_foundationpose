@@ -1,0 +1,27 @@
+FROM osrf/ros:humble-desktop-full
+
+# Install system dependencies
+RUN apt update && apt install -y \
+    python3-pip \
+    libgl1-mesa-glx \
+    libglib2.0-0 \
+    libsm6 \
+    libxext6 \
+    libxrender-dev \
+    git \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Python packages
+RUN pip3 install --no-cache-dir \
+    torch torchvision \
+    opencv-python \
+    numpy \
+    matplotlib \
+    scipy
+
+# Clone or copy your FoundationPose code
+COPY . /workspace/foundationpose
+WORKDIR /workspace/foundationpose
+
+# (Optional) Add any other model files or environment setup
+
