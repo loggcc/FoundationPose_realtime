@@ -17,6 +17,7 @@ import pyrealsense2 as rs
 import logging
 from ultralytics import YOLO
 
+
 src_path = os.path.join(os.path.dirname(__file__), "..")
 foundationpose_path = os.path.join(src_path, "FoundationPose")
 if src_path not in sys.path:
@@ -301,15 +302,15 @@ def pose_track(
     align_to = rs.stream.color
     align = rs.align(align_to)
 
-
-
-
     try:
-        timeout_seconds = 60  # set timeout 1 minute
+
+        frame_times = []
+        timeout_seconds = 120  # set timeout 1 minute
         start_time = time.time()
         i = None  # Initialize i to ensure it exists
 
         while True:
+            
             frames = pipeline.wait_for_frames()
             color_frame = frames.get_color_frame()
             if not color_frame:
@@ -344,157 +345,101 @@ def pose_track(
             # 6D pose tracking
             #################################################
             
-                
+
         while True:
-            frame = f"{i:06d}.png" # name of the frames
-            #################################################
-            # Capture frame from RealSense
-            
-        
-
-            # Create an align object to align depth to color
-            
-
+            frame_start_time = time.time()
             frames = pipeline.wait_for_frames()
-
-            # Align the depth frame to the color frame
             aligned_frames = align.process(frames)
             color_frame = aligned_frames.get_color_frame()
             depth_frame = aligned_frames.get_depth_frame()
 
-            if not color_frame or not depth_frame: # type: ignore
+            if not color_frame or not depth_frame:
                 print("Failed to get frames")
                 continue
 
             color = np.asanyarray(color_frame.get_data())
-            
-            depth = np.asanyarray(depth_frame.get_data()).astype(np.float32) / 1000.0  # mm to meters
-
+            depth = np.asanyarray(depth_frame.get_data()).astype(np.float32) / 1000.0
             depth[(depth < 0.001) | (depth >= np.inf)] = 0
 
-            # Optionally resize
             color = cv2.resize(color, (color.shape[1], color.shape[0]), interpolation=cv2.INTER_NEAREST)
             depth = cv2.resize(depth, (depth.shape[1], depth.shape[0]), interpolation=cv2.INTER_NEAREST)
 
-            #################################################
-            # 6D pose tracking
-            #################################################
-            
-            if i == 0: #if first frame:
-            
+            if i == 0:
                 mask = init_mask.astype(np.uint8) * 255
                 pose = est.register(K=cam_K, rgb=color, depth=depth, ob_mask=mask, iteration=est_refine_iter)
-
                 pose_arr = get_6d_pose_arr_from_mat(pose)
-                position = pose_arr[:3]  # x, y, z in meters
-                euler = pose_arr[3:]     # roll, pitch, yaw in radians
-                pose_matrix = get_mat_from_6d_pose_arr(pose_arr)  # Convert to 4x4 transformation matrix
+                position = pose_arr[:3]
+                euler = pose_arr[3:]
+                pose_matrix = get_mat_from_6d_pose_arr(pose_arr)
                 print(f"Frame {i}:")
-                print("Position in camera frame (m):", position)
-                print("Orientation (Euler XYZ, rad):", euler)
-                print("4x4 Transformation Matrix:")
-                print(pose_matrix)
-
+                print("Position:", position)
+                print("Orientation:", euler)
+                print("Pose Matrix:\n", pose_matrix)
 
                 if activate_kalman_filter:
-                    kf_mean, kf_covariance = kf.initiate(get_6d_pose_arr_from_mat(pose))
+                    kf_mean, kf_covariance = kf.initiate(pose_arr)
 
-                
-            
-                mask_visualization_color_filename = None
-                bbox_visualization_color_filename = None
-                
-                if mask_visualization_path is not None:
-                    os.makedirs(mask_visualization_path, exist_ok=True)
-                    mask_visualization_color_filename = os.path.join(mask_visualization_path, frame)
-                if bbox_visualization_path is not None:
-                    os.makedirs(bbox_visualization_path, exist_ok=True)
-                    bbox_visualization_color_filename = os.path.join(bbox_visualization_path, frame)
                 if activate_2d_tracker:
-                    tracker_2D.initialize(
-                        color, 
-                        init_info={"mask": init_mask}, 
-                        mask_visualization_path=mask_visualization_color_filename, 
-                        bbox_visualization_path=bbox_visualization_color_filename
-                    )
-                    
+                    tracker_2D.initialize(color, init_info={"mask": init_mask})
+
             else:
-                mask_visualization_color_filename = None
-                bbox_visualization_color_filename = None
-                if mask_visualization_path is not None:
-                    os.makedirs(mask_visualization_path, exist_ok=True)
-                    mask_visualization_color_filename = os.path.join(mask_visualization_path, frame)
-                if bbox_visualization_path is not None:
-                    os.makedirs(bbox_visualization_path, exist_ok=True)
-                    bbox_visualization_color_filename = os.path.join(bbox_visualization_path, frame)
                 if activate_2d_tracker:
-                    bbox_2d = tracker_2D.track(
-                        color,
-                        mask_visualization_path=mask_visualization_color_filename,
-                        bbox_visualization_path=bbox_visualization_color_filename
-                    )
-                
-                # adjusted_last_pose = adjust_pose_to_image_point(ob_in_cam=pose, K=cam_K, x=bbox_2d[0]+bbox_2d[2]/2, y=bbox_2d[1]+bbox_2d[3]/2)
-                if activate_2d_tracker:
+                    bbox_2d = tracker_2D.track(color)
+
                     if not activate_kalman_filter:
-                        est.pose_last = adjust_pose_to_image_point(ob_in_cam=est.pose_last, K=cam_K, x=bbox_2d[0]+bbox_2d[2]/2, y=bbox_2d[1]+bbox_2d[3]/2)
+                        est.pose_last = adjust_pose_to_image_point(
+                            ob_in_cam=est.pose_last, K=cam_K,
+                            x=bbox_2d[0]+bbox_2d[2]/2, y=bbox_2d[1]+bbox_2d[3]/2
+                        )
                     else:
-                        # using kf to estimate the 6d estimation of the last pose
                         kf_mean, kf_covariance = kf.update(kf_mean, kf_covariance, get_6d_pose_arr_from_mat(est.pose_last))
-                        measurement_xy = np.array(get_pose_xy_from_image_point(ob_in_cam=est.pose_last, K=cam_K, x=bbox_2d[0]+bbox_2d[2]/2, y=bbox_2d[1]+bbox_2d[3]/2))
+                        measurement_xy = np.array(get_pose_xy_from_image_point(
+                            ob_in_cam=est.pose_last, K=cam_K,
+                            x=bbox_2d[0]+bbox_2d[2]/2, y=bbox_2d[1]+bbox_2d[3]/2
+                        ))
                         kf_mean, kf_covariance = kf.update_from_xy(kf_mean, kf_covariance, measurement_xy)
                         est.pose_last = torch.from_numpy(get_mat_from_6d_pose_arr(kf_mean[:6])).unsqueeze(0).to(est.pose_last.device)
 
+                pose_start_time = time.time()
                 pose = est.track_one(rgb=color, depth=depth, K=cam_K, iteration=track_refine_iter)
+                pose_end_time = time.time()
+                print("pose_time", pose_end_time - pose_start_time)
+
                 pose_arr = get_6d_pose_arr_from_mat(pose)
-                position = pose_arr[:3]  # x, y, z in meters
-                euler = pose_arr[3:]     # roll, pitch, yaw in radians
-                pose_matrix = get_mat_from_6d_pose_arr(pose_arr)  # Convert to 4x4 transformation matrix
+                position = pose_arr[:3]
+                euler = pose_arr[3:]
+                pose_matrix = get_mat_from_6d_pose_arr(pose_arr)
                 print(f"Frame {i}:")
-                print("Position in camera frame (m):", position)
-                print("Orientation (Euler XYZ, rad):", euler)
-                print("4x4 Transformation Matrix:")
-                print(pose_matrix)
+                print("Position:", position)
+                print("Orientation:", euler)
+                print("Pose Matrix:\n", pose_matrix)
+
                 if activate_2d_tracker and activate_kalman_filter:
-                    # use kf to predict from last pose, and update kf status
-                    kf_mean, kf_covariance = kf.predict(kf_mean, kf_covariance)     # kf is alway one step behind
-                
-                
+                    kf_mean, kf_covariance = kf.predict(kf_mean, kf_covariance)
+            
+            center_pose = pose @ np.linalg.inv(to_origin)
+            vis_color = draw_posed_3d_box(cam_K, img=color, ob_in_cam=center_pose, bbox=bbox)
+            vis_color = draw_xyz_axis(
+                vis_color,
+                ob_in_cam=center_pose,
+                scale=0.1,
+                K=cam_K,
+                thickness=2,
+                transparency=0,
+                is_input_rgb=True,
+            )
+            cv2.imshow("Pose Tracking", cv2.cvtColor(vis_color, cv2.COLOR_RGB2BGR))
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
+
             pose_seq.append(pose.reshape(4, 4))
-            
-    ###################pose visualization       
-            if pose_visualization_path is not None:
-                # depth_normalized = cv2.normalize(np.clip(depth, 0, 900), None, 0, 255, cv2.NORM_MINMAX)
-                # depth_8bit = depth_normalized.astype(np.uint8)
-                # depth_colored = cv2.applyColorMap(depth_8bit, cv2.COLORMAP_JET)
+            frame_end_time = time.time()
+            print("frame_time", frame_end_time - frame_start_time)
+            i += 1
+            frame_times.append(frame_end_time - frame_start_time)
 
-                center_pose = pose @ np.linalg.inv(to_origin)
-                vis_color = draw_posed_3d_box(cam_K, img=color, ob_in_cam=center_pose, bbox=bbox)
-                vis_color = draw_xyz_axis(
-                    vis_color,
-                    ob_in_cam=center_pose,
-                    scale=0.1,
-                    K=cam_K,
-                    thickness=3,
-                    transparency=0,
-                    is_input_rgb=True,
-                )
-                # Show visualization live
-                cv2.imshow("Live Pose Estimation", cv2.cvtColor(vis_color, cv2.COLOR_RGB2BGR))
-                if cv2.waitKey(1) & 0xFF == ord('q'):
-                    break
 
-                if not os.path.exists(pose_visualization_path):
-                    os.makedirs(pose_visualization_path, exist_ok=True)
-                
-                pose_visualization_color_filename = os.path.join(pose_visualization_path, frame)
-                imageio.imwrite(pose_visualization_color_filename, vis_color[..., ::-1])  # Convert BGR to RGB for saving
-                
-                
-            i=i+1
-                
             
-                
 
     except KeyboardInterrupt:
         print("Stopping...")
@@ -537,11 +482,12 @@ if __name__ == "__main__":
     parser.add_argument("--apply_scale", type=float, default=0.01, help="Mesh scale factor in meters (1.0 means no scaling), commonly use 0.01")
     parser.add_argument("--force_apply_color", action='store_true', help="force a color for colorless mesh")
     parser.add_argument("--apply_color", type=json.loads, default="[0, 159, 237]", help="RGB color to apply, in format 'r,g,b'. Only effective if force_apply_color")
+    parser.add_argument("--class_name", type=str,choices=["blue_tube"],required=True, help="Class name for YOLO object detection. Options: blue_tube, green_tube, red_tube")
+    parser.add_argument("--yolo_model_path", type=str, default="/workspace/foundationpose/best.pt", help="Path to the YOLO model weights file")
     args = parser.parse_args()
-    yolo_model_path = '/workspace/foundationpose/FoundationPose-plus-plus/best.pt'
+    yolo_model_path = args.yolo_model_path
     yolo_model = YOLO(yolo_model_path)  
-    class_name = "blue_tube"
-
+    class_name = args.class_name
     pose_track(args.mesh_path,
         np.array(args.cam_K),
         args.pose_output_path,
@@ -555,3 +501,4 @@ if __name__ == "__main__":
     )
 
     torch.cuda.empty_cache()
+
