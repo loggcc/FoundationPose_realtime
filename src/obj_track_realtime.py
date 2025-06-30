@@ -17,6 +17,27 @@ import pyrealsense2 as rs
 import logging
 from ultralytics import YOLO
 
+# 0.82, 0.12,0.3
+
+T_base_tool0 = np.array([
+    [-0.815, -0.465, -0.345, -0.520],
+    [-0.496,  0.868,  0.001,  0.133],
+    [ 0.299,  0.172, -0.939,  0.529],
+    [ 0.000,  0.000,  0.000,  1.000]
+])
+
+ # tool position of home pose
+
+
+#matrix got from hand eye calibration
+T_cam2gripper = np.array([
+    [ 0.57123,      0.81900076, -0.05416683,  0.06254428],
+    [-0.82046694,   0.56790884, -0.06567765,  0.03732711],
+    [-0.02302823,   0.08195913,  0.99636961,  0.01224618],
+    [ 0.0,          0.0,         0.0,         1.0]
+])
+
+
 
 src_path = os.path.join(os.path.dirname(__file__), "..")
 foundationpose_path = os.path.join(src_path, "FoundationPose")
@@ -403,16 +424,22 @@ def pose_track(
                 pose_start_time = time.time()
                 pose = est.track_one(rgb=color, depth=depth, K=cam_K, iteration=track_refine_iter)
                 pose_end_time = time.time()
-                print("pose_time", pose_end_time - pose_start_time)
+               # print("pose_time", pose_end_time - pose_start_time)
 
                 pose_arr = get_6d_pose_arr_from_mat(pose)
-                position = pose_arr[:3]
-                euler = pose_arr[3:]
+                #position = pose_arr[:3]
+                #euler = pose_arr[3:]
                 pose_matrix = get_mat_from_6d_pose_arr(pose_arr)
-                print(f"Frame {i}:")
-                print("Position:", position)
-                print("Orientation:", euler)
+               # print(f"Frame {i}:")
+              #  print("Position:", position)
+               # print("Orientation:", euler)
                 print("Pose Matrix:\n", pose_matrix)
+                T_obj2base = T_base_tool0 @ T_cam2gripper @ pose_matrix
+                position = T_obj2base[:3, 3]
+                position = T_obj2base[:3, 3].copy()
+                position[2] += 0.05
+                print("object position in base frame:", position)
+                
 
                 if activate_2d_tracker and activate_kalman_filter:
                     kf_mean, kf_covariance = kf.predict(kf_mean, kf_covariance)

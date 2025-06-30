@@ -117,7 +117,6 @@ def get_pose_xy_from_image_point(
 
     return tx, ty
 
-
 # def adjust_pose_to_image_point(
 #         ob_in_cam_ori: torch.tensor, 
 #         K: np.ndarray, 
