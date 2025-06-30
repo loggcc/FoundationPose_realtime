@@ -60,12 +60,6 @@ cd FoundationPose_realtime/docker
 docker pull shingarey/foundationpose_custom_cuda121:latest
 bash run_container.sh
 ```
-inside the docker:
-```
-bash build_all.sh
-docker pull wenbowen123/foundationpose && docker tag wenbowen123/foundationpose foundationpose  # Or to build from scratch: docker build --network host -t foundationpose .
-bash docker/run_container.sh
-```
 
 To run the docker 
 
