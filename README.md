@@ -55,10 +55,11 @@ This method leverages a modular engineering approach for 6D pose estimation and 
 ## Environment Setup
 ```
 Check [install.md](./Install.md) to install all the dependencies.
-1. git clone this repo 
-2. pull foundationpose image in docker from [Foundationpose repo]([https://drive.google.com/drive/:](https://github.com/NVlabs/FoundationPose.git))
-
+1. git clone this repo
+```
+2. pull foundationpose image in docker from [Foundationpose repo](https://github.com/NVlabs/FoundationPose.git) 
 alternatively follow this below:
+```
 cd docker/
 docker pull wenbowen123/foundationpose && docker tag wenbowen123/foundationpose foundationpose  # Or to          build from scratch: docker build --network host -t foundationpose .
 bash docker/run_container.sh
@@ -68,8 +69,9 @@ pip install Hydra fastapi uvicorn
 pip install pyrealsense2
 pip install ultralytics==8.0.120
 
-5. Download weights of the model [Foundationpose repo]([https://drive.google.com/drive/:](https://github.com/NVlabs/FoundationPose.git)) from and put in this path:FoundationPose_realtime/FoundationPose/weights
-
+```
+5. Download weights of the model [Foundationpose repo](https://github.com/NVlabs/FoundationPose.git)  from and put in this path:FoundationPose_realtime/FoundationPose/weights
+```
 6. run docker after build:
    
 cd ~/FoundationPose_realtime/docker/
