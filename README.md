@@ -54,15 +54,37 @@ This method leverages a modular engineering approach for 6D pose estimation and 
 
 ## Environment Setup
 Check [install.md](./Install.md) to install all the dependencies.
+1. git clone this repo 
+2. pull foundationpose image in docker from [Foundationpose repo]([https://drive.google.com/drive/:](https://github.com/NVlabs/FoundationPose.git))
+
+alternatively follow this below:
+cd docker/
+docker pull wenbowen123/foundationpose && docker tag wenbowen123/foundationpose foundationpose  # Or to          build from scratch: docker build --network host -t foundationpose .
+bash docker/run_container.sh
+
+4. dependencies and requirements install:
+pip install Hydra fastapi uvicorn
+# for real time tracking:
+pip install pyrealsense2
+pip install ultralytics==8.0.120
+
+5. Download weights of the model [Foundationpose repo]([https://drive.google.com/drive/:](https://github.com/NVlabs/FoundationPose.git)) from and put in this path:FoundationPose_realtime/FoundationPose/weights
+
+6. run docker after build:
+   
+cd ~/FoundationPose_realtime/docker/
+bash run_container.sh
+
+
 
 <br>
 
 ## Data prepare
 
 
-1) [Download demo data](https://drive.google.com/drive/folders/1d5r2kKmLp0LrwcIyJ-ldvjb4zBZkXhIE?usp=drive_link) and extract them under the folder `test_data/` and `test_realtime/`
+1) [Download demo data](https://drive.google.com/drive/folders/1d5r2kKmLp0LrwcIyJ-ldvjb4zBZkXhIE?usp=drive_link) and extract them under the folder `FoundationPose_realtime/test_data/` and `FoundationPose_realtime/test_realtime/`
 
-2) [Optional] Download our customized YOLOv8 segmentation model best.pt
+2) [Optional] Download our customized  [YOLOv8 segmentation model](https://drive.google.com/drive/folders/1d5r2kKmLp0LrwcIyJ-ldvjb4zBZkXhIE?usp=drive_link) best.pt, put it under /FoundationPose_realtime
 
 
 
@@ -140,6 +162,13 @@ python src/obj_pose_track.py \
 ### Run online demo
 
 ```
+note:
+(1) The TESTCASE name should be set to align with the class name of the yolo segmentation model of the object you want to detect,also need to align with the mesh model name
+(2) The camera used here is realsense 455i, for other cameras need to extract the intrinsic matrix yourself
+(3)specify the yolo model path for detecting object and making the mask of the first scene automatically
+(4) if the size of the 3D bounding box is werid, check the unit of the mesh model you upload, should be in cm
+(5) if the bounding box is not tracking well, do check if the rgb and the depth image is aligned or not. Also keep the object within a proper range from the camera (depending on the camera capture distance) is important for pose estimation accuracy
+
 export TESTCASE="blue_tube"
 python src/obj_track_realtime.py \
 --mesh_path /workspace/foundationpose/test_realtime/$TESTCASE/mesh/$TESTCASE.stl \
