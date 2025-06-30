@@ -53,34 +53,34 @@ This method leverages a modular engineering approach for 6D pose estimation and 
 
 
 ## Environment Setup
+
+1. git clone [Foundationpose](https://github.com/NVlabs/FoundationPose.git) under FoundationPose_realtime, follow their instructions (or see below) to build the docker container:
 ```
-Check [install.md](./Install.md) to install all the dependencies.
-1. git clone this repo
+cd FoundationPose_realtime/docker
+docker pull shingarey/foundationpose_custom_cuda121:latest
+bash run_container.sh
 ```
-2. pull foundationpose image in docker from [Foundationpose repo](https://github.com/NVlabs/FoundationPose.git) 
-alternatively follow this below:
+inside the docker:
 ```
-cd docker/
-docker pull wenbowen123/foundationpose && docker tag wenbowen123/foundationpose foundationpose  # Or to          build from scratch: docker build --network host -t foundationpose .
+bash build_all.sh
+docker pull wenbowen123/foundationpose && docker tag wenbowen123/foundationpose foundationpose  # Or to build from scratch: docker build --network host -t foundationpose .
 bash docker/run_container.sh
+```
 
-4. dependencies and requirements install:
+To run the docker 
 
+cd ~/FoundationPose_realtime/docker/
+bash run_container.sh
+
+
+2. install extra dependencies inside docker:
+```
 pip install hydra-core
 pip install pyrealsense2
 pip install --upgrade ultralytics
 
 ```
-5. Download weights of the model [Foundationpose repo](https://github.com/NVlabs/FoundationPose.git)  from and put in this path:FoundationPose_realtime/FoundationPose/weights
-```
-6. run docker after build:
-   
-cd ~/FoundationPose_realtime/docker/
-bash run_container.sh
-
-```
-
-<br>
+3. Download weights of the model [Foundationpose repo](https://github.com/NVlabs/FoundationPose.git)  from and put in this path:FoundationPose_realtime/FoundationPose/weights
 
 ## Data prepare
 
