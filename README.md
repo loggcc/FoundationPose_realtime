@@ -53,6 +53,7 @@ This method leverages a modular engineering approach for 6D pose estimation and 
 
 
 ## Environment Setup
+```
 Check [install.md](./Install.md) to install all the dependencies.
 1. git clone this repo 
 2. pull foundationpose image in docker from [Foundationpose repo]([https://drive.google.com/drive/:](https://github.com/NVlabs/FoundationPose.git))
@@ -74,7 +75,7 @@ pip install ultralytics==8.0.120
 cd ~/FoundationPose_realtime/docker/
 bash run_container.sh
 
-
+```
 
 <br>
 
