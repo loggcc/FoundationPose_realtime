@@ -64,7 +64,6 @@ bash docker/run_container.sh
 
 4. dependencies and requirements install:
 pip install Hydra fastapi uvicorn
-# for real time tracking:
 pip install pyrealsense2
 pip install ultralytics==8.0.120
 
