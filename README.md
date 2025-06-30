@@ -65,9 +65,10 @@ docker pull wenbowen123/foundationpose && docker tag wenbowen123/foundationpose 
 bash docker/run_container.sh
 
 4. dependencies and requirements install:
-pip install Hydra fastapi uvicorn
+
+pip install hydra-core
 pip install pyrealsense2
-pip install ultralytics==8.0.120
+pip install --upgrade ultralytics
 
 ```
 5. Download weights of the model [Foundationpose repo](https://github.com/NVlabs/FoundationPose.git)  from and put in this path:FoundationPose_realtime/FoundationPose/weights
